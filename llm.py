@@ -48,18 +48,15 @@ def get_quote_details(quote_text):
 
     response = generate_response(client, history)
 
-    print(response)
-
     while response.function_calls != None:
         function_call = response.function_calls[0]
         history.append(response.candidates[0].content)
         call = response.function_calls[0]
         result = insert_quote(function_call.args)
-        print(f"Tool called: {result}")
         history.append(types.Content(role="tool", parts=[types.Part.from_function_response(name=function_call.name, response={"result": result})]))
         response = generate_response(client, history)
-        
-    types.FunctionResponse()
+
+    print(response.usage_metadata)
 
     return response.text
 
@@ -71,5 +68,6 @@ def generate_response(client, history):
         contents=history,
         config=types.GenerateContentConfig(
             tools=tools,
+            temperature=0
         ),
     )
