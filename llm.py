@@ -1,6 +1,12 @@
 from google import genai
 from google.genai.types import GenerateContentConfig, HttpOptions
 import data
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv('AI_API_KEY')
 
 class Quote:
     def __init__(self):
@@ -26,18 +32,20 @@ with open("quote.txt", "r") as file:
     base_prompt = file.read()
 
 def get_quote_details(quote_text):
-    prompt = base_prompt + "\n" + text_from_quote
+    prompt = base_prompt + "\n" + quote_text
 
-    client = genai.Client(http_options=HttpOptions(api_version="v1"))
+    client = genai.Client(http_options=HttpOptions(api_version="v1"), api_key=api_key)
 
     response = client.models.generate_content(
-    model=model,
-    contents=prompt,
-    config=GenerateContentConfig(
-        tools=[insert_quote_tool],
-        temperature=0,
-    ),
-)
+        model=model,
+        contents=prompt,
+        config=GenerateContentConfig(
+            tools=[insert_quote_tool],
+            temperature=0,
+        ),
+    )
+
+    return response.text
 
 def insert_quote_tool(quote: {"some": insert_quote_input}) -> str:
     """Method for inserting details of a quote into database.
